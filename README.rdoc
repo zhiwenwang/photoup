@@ -1,1 +1,3 @@
 pending...
+
+練習一下omniauth跟上傳圖片:sweat_smile:
