@@ -1,0 +1,125 @@
+<div>
+	<%= form_tag "/google_upload#create", method: "get", :id => "upload", remote: true, multipart: true do %>
+		<div id="filedrag" ondragover="dragoverHandler(event)" ondrop="dropHandler(event)"ondragleave="dragoverHandler(event)">
+			拖曳圖片到此處上傳<div id="up_progress"></div>
+		</div>
+		<div id="submitbutton">
+			<button type="submit" id="submit" >Upload</button>
+		</div>
+		<div id="imgDIV"></div>
+	<% end %>
+	 
+</div>
+
+<div>
+  <p>Canvas:</p>
+  <canvas id="myCvs" width="400" height="400"></canvas> 
+</div>
+
+<div>
+  <p>Image:</p>
+  <img id="myImg" src="" alt="image from canvas" />
+</div>
+
+<!-- <%=image_tag "rails@2x.jpg", :id=>"yo"%> -->
+<script>
+	// $(document).ready(function(){
+	// 	Caman('#yo', function () {
+	//     this.brightness(10);
+	//     this.contrast(30);
+	//     this.sepia(60);
+	//     this.saturation(-30);
+	//     this.render();
+	//   });
+	// });
+	
+
+	var img = new Image,
+    //an image that has the proper CORS response header
+    src = ,
+    cvs = document.getElementById('myCvs'),
+    ctx = cvs.getContext('2d');
+
+
+img.crossOrigin = "Anonymous";
+
+
+img.onload = function() {
+  ctx.drawImage( img, 100, 100 );
+  var imgTag = document.getElementById('myImg');
+  var dataURL = cvs.toDataURL();
+  Caman("#myImg", function () {
+  	this.brightness(0);
+    this.contrast(30);
+    this.sepia(60);
+    this.saturation(-30);
+    this.saturation(20);
+    this.render(function() {
+        //completed callback
+    });
+  });
+  imgTag.src = dataURL;
+}
+img.src = src;
+
+//resets cache on src of img if it comes back undefined, using a 1x1 blank gif dataURI
+if ( img.complete || img.complete === undefined ) {
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+    img.src = src;
+}
+	
+		
+
+		function dragoverHandler(e) {
+			e.preventDefault();
+			e.target.className = (e.type == "dragover" ? "hover" : "");
+		}
+
+		function dragleaveHandler(e){
+			e.preventDefault();
+			e.target.className = (e.type == "dragover" ? "hover" : "");
+		}
+
+		function dropHandler(e) {
+			e.preventDefault();
+			var files = e.dataTransfer.files;
+			var fd = new FormData();
+			var xhr = new XMLHttpRequest();
+			var up_progress = document.getElementById('up_progress');
+			xhr.open('POST', '/google_upload#create');
+			xhr.onload = function() {
+				up_progress.innerHTML = '100 %, 上傳完成';
+			};
+			xhr.upload.onprogress = function (e) {
+			  if (e.lengthComputable) {
+					var complete = (e.loaded / e.total * 100 | 0);
+				if(100==complete){
+					complete=99.9;
+				}
+				up_progress.innerHTML = complete + ' %';
+			  }
+			}
+
+			for (var i in files) {
+				if (files[i].type == 'image/jpeg') {
+					var fr = new FileReader();
+					fr.onload = openfile;
+					fr.readAsDataURL(files[i]);
+					fd.append('fileselect[]', files[i]);
+				}
+			}
+			$('#submit').on("click",function() {
+			xhr.send(fd);
+			});
+			e.target.className = (e.type == "dragover" ? "hover" : "");
+		}
+
+		function openfile(e) {
+			var img = e.target.result;
+			var imgx = document.createElement('img');
+			imgx.style.margin = "10px";
+			imgx.src = img;
+			document.getElementById('imgDIV').appendChild(imgx);
+		}    
+
+	</script>

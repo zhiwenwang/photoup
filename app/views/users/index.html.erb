@@ -1,0 +1,8 @@
+<h1>Login</h1>
+<tbody>
+  Welcome <%= current_user.name %>!
+    <%= image_tag current_user.image ,:size => "30x30" %>
+    <%= link_to "LogOut",destroy_user_session_path,method: :delete %>
+    <%= link_to 'Signin with Google', user_omniauth_authorize_path(:google_oauth2) %>
+  
+</tbody>
